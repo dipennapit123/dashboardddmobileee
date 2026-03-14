@@ -27,9 +27,10 @@ export function handleApiError(err: unknown): { status: number; message: string 
   }
   const msg = err instanceof Error ? err.message : "Unexpected server error.";
   const code = (err as NodeJS.ErrnoException)?.code;
+  const fullStr = String(err);
   // Log server-side for Vercel/debugging (Project → Logs)
   console.error("[api-error]", msg, code ?? "");
-  if (isDbConnectionError(msg, code)) {
+  if (isDbConnectionError(msg, code) || isDbConnectionError(fullStr, code)) {
     return { status: 503, message: DB_UNAVAILABLE_MSG };
   }
   return { status: 500, message: msg };

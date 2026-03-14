@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dayjs from "dayjs";
 import { api } from "@/lib/api-client";
 import { Card, Button, Input } from "@/components/ui";
 import type { ZodiacSign } from "@/lib/types";
@@ -37,14 +38,20 @@ export default function GeneratePage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      date: new Date().toISOString().slice(0, 10),
+      date: "",
       allZodiacs: true,
     },
   });
+
+  // Set date on client only to avoid hydration mismatch (React #418)
+  useEffect(() => {
+    setValue("date", dayjs().format("YYYY-MM-DD"));
+  }, [setValue]);
   const [previews, setPreviews] = useState<GeneratedItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
