@@ -27,7 +27,7 @@ In `mobile/.env`:
 
 - `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` — same as in Clerk Dashboard (you likely have this already).
 - `EXPO_PUBLIC_API_BASE_URL` — base URL of this app’s API:
-  - **Production (after hosting on Vercel):** `https://YOUR_PROJECT.vercel.app/api`
+  - **Production (hosted):** `https://dashboardddmobileee.vercel.app/api`
   - Same machine: `http://localhost:3000/api`
   - Device/simulator on LAN: `http://<your-machine-IP>:3000/api` (e.g. `http://192.168.1.69:3000/api`)
 

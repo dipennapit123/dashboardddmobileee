@@ -31,6 +31,14 @@ In **Project → Settings → Environment Variables**, add these for **Productio
 - Use the **Session mode** pooler connection string from: Supabase → Project Settings → Database → **Connection string** → **Session pooler** (port **6543**).
 - URL-encode the password if it contains special characters.
 
+### Create tables (required if the DB is empty)
+
+The app needs tables `Admin`, `User`, `UserActivity`, and `Horoscope`. If you have no migration yet:
+
+1. In Supabase: **SQL Editor** → **New query**.
+2. Copy the contents of **`supabase/schema.sql`** in this repo and paste into the editor.
+3. Click **Run**. That creates all tables. Then create your first admin from the dashboard login page (**First time? Create admin account**).
+
 ## 4. Mobile app after hosting
 
 Once deployed, your API base URL will be:
