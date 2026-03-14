@@ -124,7 +124,12 @@ export default function GeneratePage() {
             </div>
           </div>
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && (
+            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+              {error.includes("Database") && " Set DATABASE_URL in Vercel → Settings → Environment Variables and ensure Supabase is not paused."}
+            </div>
+          )}
 
           <Button type="submit" disabled={isGenerating}>
             {isGenerating ? "Generating..." : "Generate"}

@@ -330,13 +330,20 @@ async function groqGenerate(
   throw lastError;
 }
 
+const mockGenerator = new MockGenerator();
+
 export function getGenerator(): HoroscopeGeneratorService {
   if (env.groqApiKey) {
     return {
       async generate(input) {
-        return groqGenerate(input);
+        try {
+          return await groqGenerate(input);
+        } catch (err) {
+          console.warn("[generator] Groq failed, using mock:", err instanceof Error ? err.message : err);
+          return mockGenerator.generate(input);
+        }
       },
     };
   }
-  return new MockGenerator();
+  return mockGenerator;
 }

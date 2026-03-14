@@ -55,8 +55,9 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ success: true, data: generated });
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("[generate] Error:", err);
+    const errMsg = err instanceof Error ? err.message : String(err);
+    const errCode = (err as NodeJS.ErrnoException)?.code;
+    console.error("[generate] Error:", errMsg, errCode ?? "");
     const { status, message } = handleApiError(err);
     return NextResponse.json(
       { success: false, error: { message } },
