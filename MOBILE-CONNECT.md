@@ -2,6 +2,8 @@
 
 The mobile app (Expo + Clerk) talks to this Next.js app’s API so you can use one backend for both the admin dashboard and the app.
 
+**You do not need to configure the mobile app with Supabase.** Only this backend (admin-dashboard2) connects to Supabase. The mobile only needs `EXPO_PUBLIC_API_BASE_URL` and `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`; all data (users, horoscopes) goes through this API.
+
 ## 1. Clerk (same app as mobile)
 
 Use the **same** Clerk application for the mobile app and for JWT verification here.

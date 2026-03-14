@@ -5,6 +5,28 @@ import { getHoroscopeHistoryForZodiac } from "@/lib/horoscope-user.service";
 import type { ZodiacSign } from "@/lib/types";
 import { handleApiError } from "@/lib/api-error";
 
+/** Map DB row to the shape expected by the mobile app (date as ISO string). */
+function toMobileHoroscope(row: Record<string, unknown>) {
+  const date = row.date instanceof Date ? row.date : new Date((row.date as string) ?? "");
+  return {
+    id: row.id,
+    zodiacSign: row.zodiacSign,
+    date: date.toISOString(),
+    title: row.title,
+    summary: row.summary,
+    wealthText: row.wealthText,
+    loveText: row.loveText,
+    healthText: row.healthText,
+    wealthConfidence: Number(row.wealthConfidence) ?? 70,
+    loveConfidence: Number(row.loveConfidence) ?? 70,
+    healthConfidence: Number(row.healthConfidence) ?? 70,
+    wealthActionLabel: row.wealthActionLabel ?? null,
+    loveActionLabel: row.loveActionLabel ?? null,
+    healthActionLabel: row.healthActionLabel ?? null,
+    weeklyOutlook: row.weeklyOutlook ?? null,
+  };
+}
+
 export async function GET() {
   try {
     const clerkUserId = await getUserIdFromRequest();
@@ -18,8 +40,9 @@ export async function GET() {
       );
     }
 
-    const history = await getHoroscopeHistoryForZodiac(zodiacSign as ZodiacSign);
-    return NextResponse.json({ success: true, data: history });
+    const rows = await getHoroscopeHistoryForZodiac(zodiacSign as ZodiacSign);
+    const data = rows.map((row) => toMobileHoroscope(row as unknown as Record<string, unknown>));
+    return NextResponse.json({ success: true, data });
   } catch (err) {
     const { status, message } = handleApiError(err);
     return NextResponse.json(
