@@ -32,15 +32,22 @@ export default function DashboardPage() {
   const [analytics, setAnalytics] = useState<UserAnalytics | null>(null);
   const [recent, setRecent] = useState<Horoscope[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [todayRangeLabel, setTodayRangeLabel] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
   const mounted = useRef(true);
 
   const loadAll = useCallback(async () => {
+    setApiError(null);
     const [statsRes, analyticsRes, recentRes] = await Promise.allSettled([
       api.get<DashboardStats>("/admin/horoscopes/dashboard/stats"),
       api.get<UserAnalytics>("/admin/users/analytics"),
       api.get<Horoscope[]>("/admin/horoscopes?page=1&pageSize=4"),
     ]);
     if (!mounted.current) return;
+    const failed = [statsRes, analyticsRes, recentRes].find((r) => r.status === "rejected");
+    if (failed && failed.status === "rejected") {
+      setApiError(failed.reason?.message ?? "Failed to load dashboard data.");
+    }
     if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
     if (analyticsRes.status === "fulfilled") setAnalytics(analyticsRes.value.data);
     if (recentRes.status === "fulfilled") {
@@ -52,15 +59,22 @@ export default function DashboardPage() {
 
   useEffect(() => {
     mounted.current = true;
+    setTodayRangeLabel(`${dayjs().subtract(30, "day").format("MMM D, YYYY")} - ${dayjs().format("MMM D, YYYY")}`);
     loadAll();
     return () => { mounted.current = false; };
   }, [loadAll]);
 
-  const todayRangeLabel = `${dayjs().subtract(30, "day").format("MMM D, YYYY")} - ${dayjs().format("MMM D, YYYY")}`;
   const skeleton = <div className="mt-2 h-7 w-16 rounded-2xl bg-purple-900/40 animate-pulse" />;
 
   return (
     <div className="space-y-8">
+      {apiError && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          <strong>API error:</strong> {apiError}
+          {apiError.includes("Database") && " Set DATABASE_URL (and DATABASE_URL_POOLER) in Vercel → Settings → Environment Variables and redeploy."}
+          {apiError.includes("authorization") && " Log in via the Sign out link below, or set ALLOW_ANONYMOUS_ADMIN for local dev only."}
+        </div>
+      )}
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
@@ -75,7 +89,7 @@ export default function DashboardPage() {
             <span className="material-symbols-outlined mr-2 text-purple-300">
               calendar_today
             </span>
-            <span className="font-medium">{todayRangeLabel}</span>
+            <span className="font-medium" suppressHydrationWarning>{todayRangeLabel || "—"}</span>
           </div>
         </div>
       </header>

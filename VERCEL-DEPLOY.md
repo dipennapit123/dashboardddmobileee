@@ -56,6 +56,7 @@ Use the same Clerk publishable key as in the Vercel env. Rebuild/restart the mob
 
 ## Troubleshooting
 
+- **API returns 500:** Usually missing or wrong env (e.g. `DATABASE_URL`, `ADMIN_JWT_SECRET`). Check Vercel → Project → Settings → Environment Variables and redeploy. If the error says "Database unavailable", use the Supabase Session pooler URL and ensure the project is not paused.
 - **404 NOT_FOUND:**  
   - If you see this on the **root URL** (`https://your-app.vercel.app/`), set **Root Directory** in Vercel: **Project → Settings → General → Root Directory**.  
   - If you deployed the **dashreview** repo (app at repo root): leave Root Directory **empty** or `.`.  
