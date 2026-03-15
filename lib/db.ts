@@ -2,6 +2,14 @@ import { Pool } from "pg";
 
 const isVercel = process.env.VERCEL === "1";
 
+/** If URL is Supabase pooler host but port 5432, return same URL with port 6543 (Session pooler port). */
+function ensurePoolerPort(url: string): string {
+  if (!url.includes("pooler.supabase.com")) return url;
+  // Supabase Session pooler uses 6543; 5432 on pooler host often fails from serverless
+  if (url.includes(":5432/")) return url.replace(":5432/", ":6543/");
+  return url;
+}
+
 function getDatabaseUrls(): string[] {
   const primary =
     process.env.DATABASE_URL ||
@@ -14,7 +22,13 @@ function getDatabaseUrls(): string[] {
 
   const urls: string[] = [];
   const add = (url: string) => {
-    if (url.trim() && !url.startsWith("${{")) urls.push(url.trim());
+    const trimmed = url.trim();
+    if (!trimmed || trimmed.startsWith("${{")) return;
+    // Supabase pooler with 5432 fails from serverless; try 6543 first
+    if (trimmed.includes("pooler.supabase.com") && trimmed.includes(":5432/")) {
+      urls.push(ensurePoolerPort(trimmed));
+    }
+    urls.push(trimmed);
   };
 
   // On Vercel, prefer pooler first (recommended for serverless; use port 6543 for Supabase Session pooler)
@@ -22,7 +36,8 @@ function getDatabaseUrls(): string[] {
   if (primary) add(primary);
   if (!isVercel && pooler) add(pooler);
 
-  return urls;
+  // Dedupe so we don't try same URL twice (e.g. primary and pooler were same)
+  return [...new Set(urls)];
 }
 
 /** True if this error should trigger trying the next connection URL (fallback). */
