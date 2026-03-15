@@ -64,6 +64,28 @@ Use the same Clerk publishable key as in the Vercel env. Rebuild/restart the mob
 
 ## Troubleshooting
 
+### 503 on /api/users/me, /api/users/zodiac, /api/horoscopes/history, etc.
+
+**503 means the app cannot reach the database from Vercel.** Fix it like this:
+
+1. **Set env vars in Vercel** (not only in local `.env`):  
+   **Vercel → Your project → Settings → Environment Variables.**  
+   Add `DATABASE_URL` (and optionally `DATABASE_URL_POOLER`) for **Production** (and Preview if you use it).
+
+2. **Use the correct Supabase connection string:**
+   - Supabase Dashboard → your project → **Project Settings → Database**.
+   - Under **Connection string**, open the **Session pooler** tab.
+   - Copy the **URI**; it should look like  
+     `postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres`  
+     **Use port 6543** for the Session pooler (not 5432).
+   - Replace `[YOUR-PASSWORD]` with your real DB password. If the password has `@`, `#`, or `%`, encode them as `%40`, `%23`, `%25`.
+
+3. **Supabase project must be active:** If the project is **Paused**, restore it in the Supabase dashboard.
+
+4. **Redeploy:** After changing env vars, trigger a new deployment (Deployments → ⋮ → Redeploy).
+
+5. **Check:** Open `https://YOUR_PROJECT.vercel.app/api/health`. The JSON should show `"database": "connected"`. If it shows `"disconnected"`, the DB URL or Supabase state is still wrong.
+
 - **API returns 500:** Usually missing or wrong env (e.g. `DATABASE_URL`, `ADMIN_JWT_SECRET`). Check Vercel → Project → Settings → Environment Variables and redeploy. If the error says "Database unavailable", use the Supabase Session pooler URL and ensure the project is not paused.
 - **404 NOT_FOUND:**  
   - If you see this on the **root URL** (`https://your-app.vercel.app/`), set **Root Directory** in Vercel: **Project → Settings → General → Root Directory**.  

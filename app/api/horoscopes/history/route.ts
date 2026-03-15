@@ -44,6 +44,9 @@ export async function GET() {
     const data = rows.map((row) => toMobileHoroscope(row as unknown as Record<string, unknown>));
     return NextResponse.json({ success: true, data });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const code = (err as NodeJS.ErrnoException)?.code;
+    console.error("[horoscopes/history] GET failed:", msg, "code=", code ?? "(none)");
     const { status, message } = handleApiError(err);
     return NextResponse.json(
       { success: false, error: { message } },
