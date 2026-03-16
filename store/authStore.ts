@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 export interface AdminInfo {
   id: string;
   name: string;
-  email: string;
+  username?: string;
   role: string;
 }
 

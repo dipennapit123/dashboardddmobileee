@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 
@@ -20,6 +22,17 @@ export default function DashboardLayout({
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!token) {
+      router.replace("/login");
+    }
+  }, [token, router]);
+
+  if (!token) {
+    return null;
+  }
 
   let activeKey = "dashboard";
   if (pathname?.startsWith("/horoscopes")) activeKey = "horoscopes";
@@ -74,13 +87,17 @@ export default function DashboardLayout({
             </div>
           </div>
           {token && (
-            <Link
-              href="/login"
-              onClick={() => logout()}
-              className="mt-2 block rounded-lg px-3 py-1.5 text-xs text-slate-500 hover:text-purple-200"
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                router.replace("/login");
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/20"
             >
-              Sign out
-            </Link>
+              <span className="material-symbols-outlined text-[18px]">logout</span>
+              <span>Logout</span>
+            </button>
           )}
         </div>
       </aside>

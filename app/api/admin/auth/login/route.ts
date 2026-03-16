@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { loginAdmin } from "@/lib/admin-auth.service";
+import { loginDefaultAdmin } from "@/lib/admin-auth.service";
 import { handleApiError } from "@/lib/api-error";
 
 const schema = z.object({
-  email: z.string().email(),
+  username: z.string().min(1),
   password: z.string().min(6),
 });
 
@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { token, admin } = await loginAdmin(parsed.data.email, parsed.data.password);
+    const { token, admin } = await loginDefaultAdmin(
+      parsed.data.username,
+      parsed.data.password
+    );
     return NextResponse.json({ success: true, data: { token, admin } });
   } catch (err) {
     const { status, message } = handleApiError(err);

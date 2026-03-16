@@ -9,6 +9,8 @@ const databaseUrl =
 export const env = {
   databaseUrl,
   adminJwtSecret: (process.env.ADMIN_JWT_SECRET ?? "changeme").trim(),
+  adminDefaultUsername: (process.env.ADMIN_DEFAULT_USERNAME ?? "").trim(),
+  adminDefaultPassword: process.env.ADMIN_DEFAULT_PASSWORD ?? "",
   groqApiKey: process.env.GROQ_API_KEY ?? "",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   clerkJwtIssuer: (process.env.CLERK_JWT_ISSUER ?? "").replace(/\/$/, ""),

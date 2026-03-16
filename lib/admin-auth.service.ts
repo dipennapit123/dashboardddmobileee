@@ -87,3 +87,38 @@ export async function loginAdmin(email: string, password: string) {
     admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
   };
 }
+
+export function loginDefaultAdmin(username: string, password: string) {
+  if (!env.adminJwtSecret || env.adminJwtSecret === "changeme") {
+    throw new ApiError(
+      500,
+      "Server misconfiguration: ADMIN_JWT_SECRET is not set."
+    );
+  }
+  if (!env.adminDefaultUsername || !env.adminDefaultPassword) {
+    throw new ApiError(
+      500,
+      "Server misconfiguration: ADMIN_DEFAULT_USERNAME or ADMIN_DEFAULT_PASSWORD is not set."
+    );
+  }
+  if (
+    username.trim() !== env.adminDefaultUsername ||
+    password !== env.adminDefaultPassword
+  ) {
+    throw new ApiError(401, "Invalid credentials.");
+  }
+  const token = jwt.sign(
+    { adminId: "default-admin", role: "SUPER_ADMIN" },
+    env.adminJwtSecret,
+    { expiresIn: "7d" }
+  );
+  return {
+    token,
+    admin: {
+      id: "default-admin",
+      name: env.adminDefaultUsername,
+      username: env.adminDefaultUsername,
+      role: "SUPER_ADMIN" as const,
+    },
+  };
+}

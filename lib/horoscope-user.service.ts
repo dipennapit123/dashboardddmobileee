@@ -21,13 +21,5 @@ export async function getHoroscopeHistoryForZodiac(
      ORDER BY date DESC LIMIT $2`,
     [zodiac, limit],
   );
-  if (published.rows.length > 0) return published.rows;
-
-  const drafts = await query(
-    `SELECT * FROM "Horoscope"
-     WHERE "zodiacSign" = $1
-     ORDER BY date DESC LIMIT $2`,
-    [zodiac, limit],
-  );
-  return drafts.rows;
+  return published.rows;
 }
